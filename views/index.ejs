@@ -1,0 +1,84 @@
+<div class="container">
+  <h2>Welcome to NutriScan</h2>
+  <p>
+    Your go-to app for nutritional information. Use the search options below to
+    find out more about the nutritional content of your favorite foods!
+  </p>
+  <div
+    class="search-container main-search flex-row align-items-center justify-content-space-between"
+  >
+    <div class="search-options flex-column search-box-area">
+      <h3>Search for a product</h3>
+      <form action="/search" method="get" class="search-form">
+        <input
+          type="text"
+          name="query"
+          placeholder="Enter product name..."
+          required
+        />
+        <button type="submit" class="search-btn form-btn main-button">
+          Search
+        </button>
+      </form>
+    </div>
+    <div
+      class="barcode-search flex-column justify-content-space-between search-box-area"
+    >
+      <h3>Or Enter (Scan) a barcode</h3>
+      <form action="/product" method="get" class="barcode-form">
+        <input
+          type="text"
+          name="barcode"
+          placeholder="Or enter a barcode..."
+          required
+        />
+        <button type="submit" class="search-btn form-btn main-button">
+          Search
+        </button>
+      </form>
+    </div>
+    <div class="multi-param-search flex-column search-box-area">
+      <h3>Filter Search</h3>
+      <form
+        action="/search"
+        method="get"
+        class="multi-param-form flex-column align-items-start"
+      >
+        <input type="text" id="mp-name" placeholder="Enter product name..." />
+
+        <input type="text" id="mp-brand" placeholder="Enter brand(s)..." />
+
+        <input
+          type="text"
+          name="categories"
+          placeholder="e.g. ice-cream, sherbert"
+        />
+
+        <input type="text" id="mp-labels" placeholder="e.g organic, vegan..." />
+
+        <select id="mp-nutriscore" name="nutriscore_grade">
+          <option value="">Nutri-Score Grade</option>
+          <option value="a">A</option>
+          <option value="b">B</option>
+          <option value="c">C</option>
+          <option value="d">D</option>
+          <option value="e">E</option>
+        </select>
+
+        <select id="mp-nova" name="nova_group">
+          <option value="">NOVA Group</option>
+          <option value="1">
+            1 - Unprocessed or minimally processed foods
+          </option>
+          <option value="2">2 - Processed culinary ingredients</option>
+          <option value="3">3 - Processed foods</option>
+          <option value="4">4 - Ultra-processed food and drink products</option>
+        </select>
+
+        <button type="submit" class="search-btn form-btn main-button">
+          Filter Search
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

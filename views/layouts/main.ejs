@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutriScan</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="main-layout">
+
+    <!-- Global Header-->
+    <header class="main-header">
+        <div class="header-inner">
+            <nav class="main-nav navbar">
+                <%- include('../partials/navbar') %>
+            </nav>
+            
+        </div>
+    </header>
+
+        
+    
+    <main>
+        <div class="container main-content">   
+            <%- body %>
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="footer-inner">
+        <%- include('../partials/footer') %>
+        </div>
+    </footer>
+
+    <script >
+        // JavaScript code can be added here if needed
+    </script>
+</body>
+</html>
