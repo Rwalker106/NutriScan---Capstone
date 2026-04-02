@@ -1,39 +1,43 @@
 <div class="container">
-  <h2>Welcome to NutriScan</h2>
-  <p>
-    Your go-to app for nutritional information. Use the search options below to
-    find out more about the nutritional content of your favorite foods!
-  </p>
-  <div
-    class="search-container main-search flex-row align-items-center justify-content-space-between"
-  >
+  <div class="hero-section">
+    <h1>Welcome to NutriScan</h1>
+    <p>
+      Your go-to app for nutritional information. Use the search options below to
+      find out more about the nutritional content of your favorite foods!
+    </p>
+  </div>
+  <div class="search-container main-search">
     <div class="search-options flex-column search-box-area">
       <h3>Search for a product</h3>
       <form action="/search" method="get" class="search-form">
+        <label for="product-query" class="sr-only">Product Name</label>
         <input
           type="text"
+          id="product-query"
           name="query"
           placeholder="Enter product name..."
           required
         />
-        <button type="submit" class="search-btn form-btn main-button">
+        <button type="submit" class="search-btn accent-btn">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
           Search
         </button>
       </form>
     </div>
-    <div
-      class="barcode-search flex-column justify-content-space-between search-box-area"
-    >
+    <div class="barcode-search flex-column search-box-area">
       <h3>Or Enter (Scan) a barcode</h3>
       <form action="/product" method="get" class="barcode-form">
+        <label for="barcode-input" class="sr-only">Barcode</label>
         <input
           type="text"
+          id="barcode-input"
           name="barcode"
           placeholder="Or enter a barcode..."
           required
         />
-        <button type="submit" class="search-btn form-btn main-button">
-          Search
+        <button type="submit" class="search-btn">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m-4-16v16M4 4v16m16-16v16m-4-16v16"></path></svg>
+          Search Barcode
         </button>
       </form>
     </div>
@@ -42,20 +46,26 @@
       <form
         action="/search"
         method="get"
-        class="multi-param-form flex-column align-items-start"
+        class="multi-param-form flex-column"
       >
-        <input type="text" id="mp-name" placeholder="Enter product name..." />
+        <label for="mp-name" class="sr-only">Product Name</label>
+        <input type="text" id="mp-name" name="name" placeholder="Enter product name..." />
 
-        <input type="text" id="mp-brand" placeholder="Enter brand(s)..." />
+        <label for="mp-brand" class="sr-only">Brand</label>
+        <input type="text" id="mp-brand" name="brands" placeholder="Enter brand(s)..." />
 
+        <label for="mp-categories" class="sr-only">Categories</label>
         <input
           type="text"
+          id="mp-categories"
           name="categories"
           placeholder="e.g. ice-cream, sherbert"
         />
 
-        <input type="text" id="mp-labels" placeholder="e.g organic, vegan..." />
+        <label for="mp-labels" class="sr-only">Labels</label>
+        <input type="text" id="mp-labels" name="labels" placeholder="e.g organic, vegan..." />
 
+        <label for="mp-nutriscore" class="sr-only">Nutri-Score Grade</label>
         <select id="mp-nutriscore" name="nutriscore_grade">
           <option value="">Nutri-Score Grade</option>
           <option value="a">A</option>
@@ -65,17 +75,17 @@
           <option value="e">E</option>
         </select>
 
+        <label for="mp-nova" class="sr-only">NOVA Group</label>
         <select id="mp-nova" name="nova_group">
           <option value="">NOVA Group</option>
-          <option value="1">
-            1 - Unprocessed or minimally processed foods
-          </option>
+          <option value="1">1 - Unprocessed or minimally processed</option>
           <option value="2">2 - Processed culinary ingredients</option>
           <option value="3">3 - Processed foods</option>
-          <option value="4">4 - Ultra-processed food and drink products</option>
+          <option value="4">4 - Ultra-processed foods</option>
         </select>
 
-        <button type="submit" class="search-btn form-btn main-button">
+        <button type="submit" class="search-btn" style="margin-top: 0.5rem;">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
           Filter Search
         </button>
       </form>
