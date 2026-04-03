@@ -1,0 +1,176 @@
+<style>
+    .error-page-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 60vh;
+        padding: 2rem;
+    }
+    
+    .error-card {
+        background-color: var(--color-card);
+        border-radius: 16px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+        border: 1px solid var(--color-border);
+        padding: 3rem 2rem;
+        max-width: 500px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        animation: slideUp 0.5s ease-out forwards;
+    }
+    
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .error-code {
+        font-family: 'Poppins', sans-serif;
+        font-size: 8rem;
+        font-weight: 700;
+        color: var(--color-primary);
+        opacity: 0.15;
+        line-height: 1;
+        margin: 0;
+        position: absolute;
+        top: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 0;
+        user-select: none;
+    }
+    
+    .error-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+    
+    .error-icon {
+        width: 140px;
+        height: 140px;
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-10px) rotate(5deg); }
+        100% { transform: translateY(0px) rotate(0deg); }
+    }
+    
+    .error-title {
+        color: var(--color-primary-dark);
+        font-size: 1.8rem;
+        margin: 0;
+    }
+    
+    .error-message {
+        color: var(--color-muted);
+        font-size: 1.05rem;
+        line-height: 1.6;
+        margin: 0;
+    }
+    
+    .error-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .btn {
+        text-decoration: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .btn-primary {
+        background-color: var(--color-primary);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background-color: var(--color-primary-dark);
+        transform: translateY(-2px);
+    }
+    
+    .btn-secondary {
+        background-color: #f1f5f9;
+        color: var(--color-text);
+        border: 1px solid #e2e8f0;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #e2e8f0;
+        transform: translateY(-2px);
+    }
+</style>
+
+<div class="error-page-wrapper">
+    <div class="error-card">
+        <div class="error-code"><%= typeof status !== 'undefined' ? status : '500' %></div>
+        
+        <div class="error-content">
+            <!-- Playful Error Illustration -->
+            <svg class="error-icon" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Apple body -->
+                <path d="M100 160C140 160 160 130 160 90C160 50 130 40 100 40C70 40 40 50 40 90C40 130 60 160 100 160Z" fill="var(--color-primary)" opacity="0.85"/>
+                
+                <!-- Bite taken out -->
+                <path d="M165 90C165 110 145 125 125 120C105 115 100 90 115 75C130 60 165 70 165 90Z" fill="var(--color-card)"/>
+                <path d="M150 135C135 140 120 135 115 120C110 105 125 95 140 95C155 95 165 115 150 135Z" fill="var(--color-card)"/>
+                
+                <!-- Stem -->
+                <path d="M100 40C100 25 110 15 120 10" stroke="#8C7B6B" stroke-width="8" stroke-linecap="round"/>
+                
+                <!-- Leaf -->
+                <path d="M120 10C135 10 145 20 145 35C130 35 120 25 120 10Z" fill="var(--color-primary-dark)"/>
+                
+                <!-- Confused/Sad face -->
+                <circle cx="75" cy="80" r="10" fill="#fff"/>
+                <circle cx="75" cy="80" r="4" fill="#3B3226"/>
+                <circle cx="110" cy="80" r="10" fill="#fff"/>
+                <circle cx="112" cy="80" r="4" fill="#3B3226"/>
+                <path d="M80 115Q95 105 110 115" stroke="#3B3226" stroke-width="5" stroke-linecap="round" fill="none"/>
+                
+                <!-- Question mark 1 -->
+                <path d="M40 50C45 40 55 40 55 50C55 60 45 65 45 75" stroke="var(--color-accent)" stroke-width="5" stroke-linecap="round" fill="none"/>
+                <circle cx="45" cy="85" r="4" fill="var(--color-accent)"/>
+                
+                <!-- Question mark 2 -->
+                <path d="M160 30C165 20 175 20 175 30C175 40 165 45 165 55" stroke="var(--color-accent)" stroke-width="4" stroke-linecap="round" fill="none"/>
+                <circle cx="165" cy="62" r="3" fill="var(--color-accent)"/>
+            </svg>
+            
+            <h1 class="error-title">
+                <%= typeof title !== 'undefined' ? title : 'Oops! Something went wrong.' %>
+            </h1>
+            
+            <p class="error-message">
+                <%= typeof message !== 'undefined' ? message : 'Our servers tried to digest that request, but got a tummy ache. We are working on it!' %>
+            </p>
+            
+            <div class="error-actions">
+                <a href="/" class="btn btn-primary">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    Back to Home
+                </a>
+                <a href="javascript:history.back()" class="btn btn-secondary">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+                    Go Back
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

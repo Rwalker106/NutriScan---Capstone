@@ -159,8 +159,12 @@ app.get('/product/:barcode', async (req, res) => {
         const product = normalizeProduct(response.product);
         res.render('product_detail', { product });
     } catch (error) {
-        console.error(error);
-        res.status(500).send('Error fetching data');
+        console.error("Barcode search error:", error.message);
+        res.status(500).render('error', {
+            title: 'Product Not Found',
+            message: 'We could not fetch data for this barcode. Make sure the barcode is correct or try another one.',
+            status: 500
+        });
     }
 });
 // Route for search by name
@@ -215,14 +219,37 @@ app.get('/search', async (req, res) => {
         const products = response.products.map(normalizeProduct);
         res.render('product', { products, page, basePath });
     } catch (error) {
-        console.error(error);
-        res.status(500).send('Error fetching data');
+        console.error("Search API error:", error.message);
+        res.status(500).render('error', {
+            title: 'Search Failed',
+            message: 'We encountered an error while searching the food database. Please check your spelling and try again.',
+            status: 500
+        });
     }
 });
 
 // Route for favorites page
 app.get('/favorites', (req, res) => {
     res.render('favorites');
+});
+
+// 404 handler for unknown routes
+app.use((req, res, next) => {
+    res.status(404).render('error', {
+        title: 'Page Not Found',
+        message: 'The page you are looking for has vanished into the digital supermarket aisle. Check the URL and try again.',
+        status: 404
+    });
+});
+
+// General error handler
+app.use((err, req, res, next) => {
+    console.error("Global error handler:", err.stack);
+    res.status(500).render('error', {
+        title: 'Unexpected Error',
+        message: 'Something broke in our kitchen. We are cleaning up the mess!',
+        status: 500
+    });
 });
 
 app.listen(PORT, () => {

@@ -30,12 +30,41 @@
                 <div class="detail-badges">
                     <% if (product.nutriScore) { %>
                         <div class="badge-card nutri-score score-<%= product.nutriScore.toLowerCase() %>">
-                            Nutri-Score <strong><%= product.nutriScore.toUpperCase() %></strong>
+                            <span>Nutri-Score <strong><%= product.nutriScore.toUpperCase() %></strong></span>
+                            <% 
+                                let nsMsg = '';
+                                switch(product.nutriScore.toLowerCase()) {
+                                    case 'a': nsMsg = 'Nutri-Score A: Excellent nutritional quality. Foods you can eat regularly.'; break;
+                                    case 'b': nsMsg = 'Nutri-Score B: Good nutritional quality.'; break;
+                                    case 'c': nsMsg = 'Nutri-Score C: Moderate nutritional quality.'; break;
+                                    case 'd': nsMsg = 'Nutri-Score D: Lower nutritional quality. Consume in moderation.'; break;
+                                    case 'e': nsMsg = 'Nutri-Score E: Poor nutritional quality. Limit consumption.'; break;
+                                    default: nsMsg = 'Nutri-Score evaluates the nutritional quality of the product.';
+                                }
+                            %>
+                            <span class="info-tooltip" style="color: inherit;" tabindex="0">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+                                <span class="tooltip-text"><%= nsMsg %></span>
+                            </span>
                         </div>
                     <% } %>
                     <% if (product.nova) { %>
                         <div class="badge-card nova-group">
-                            NOVA <strong><%= product.nova %></strong>
+                            <span>NOVA <strong><%= product.nova %></strong></span>
+                            <% 
+                                let novaMsg = '';
+                                switch(parseInt(product.nova)) {
+                                    case 1: novaMsg = 'NOVA 1: Unprocessed or minimally processed foods.'; break;
+                                    case 2: novaMsg = 'NOVA 2: Processed culinary ingredients.'; break;
+                                    case 3: novaMsg = 'NOVA 3: Processed foods.'; break;
+                                    case 4: novaMsg = 'NOVA 4: Ultra-processed food and drink products.'; break;
+                                    default: novaMsg = 'NOVA classifies food by their level of processing.';
+                                }
+                            %>
+                            <span class="info-tooltip" style="color: inherit;" tabindex="0">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+                                <span class="tooltip-text"><%= novaMsg %></span>
+                            </span>
                         </div>
                     <% } %>
                     <% if (product.ecoScore && product.ecoScore !== 'unknown' && product.ecoScore !== 'not-applicable') { %>
