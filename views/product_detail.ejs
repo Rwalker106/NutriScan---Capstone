@@ -1,0 +1,208 @@
+<div class="product-detail-container">
+    <div class="detail-header" style="margin-bottom: 1.5rem;">
+        <a href="javascript:history.back()" style="display: inline-flex; align-items: center; gap: 5px; color: var(--color-primary); text-decoration: none; font-weight: 600; font-family: 'Inter', sans-serif;">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Back
+        </a>
+    </div>
+
+    <% if (product) { %>
+        <div class="detail-split">
+            <!-- Left Side: Image & Core Info -->
+            <div class="detail-hero card-box">
+                <div class="detail-img-box">
+                    <img src="<%= product.image %>" alt="<%= product.name %>" onerror="this.src='/img/no-image.png'">
+                </div>
+                <div class="detail-title-area">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 0.5rem;">
+                        <h2 style="margin: 0;"><%= product.name %></h2>
+                        <button id="favorite-btn" data-code="<%= product.code %>" data-name="<%= product.name.replace(/"/g, '&quot;') %>" data-image="<%= product.image %>" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: #ccc; padding: 0; line-height: 1; transition: transform 0.2s ease, color 0.3s ease;" title="Save Scan">
+                            ☆
+                        </button>
+                    </div>
+                    <% if (product.brand && product.brand !== 'Unknown') { %>
+                        <p class="detail-brand"><%= product.brand %></p>
+                    <% } %>
+                    <p class="detail-code">Barcode: <%= product.code %></p>
+                </div>
+                <div class="detail-badges">
+                    <% if (product.nutriScore) { %>
+                        <div class="badge-card nutri-score score-<%= product.nutriScore.toLowerCase() %>">
+                            Nutri-Score <strong><%= product.nutriScore.toUpperCase() %></strong>
+                        </div>
+                    <% } %>
+                    <% if (product.nova) { %>
+                        <div class="badge-card nova-group">
+                            NOVA <strong><%= product.nova %></strong>
+                        </div>
+                    <% } %>
+                    <% if (product.ecoScore && product.ecoScore !== 'unknown' && product.ecoScore !== 'not-applicable') { %>
+                        <div class="badge-card eco-score score-<%= product.ecoScore.toLowerCase() %>">
+                            Eco-Score <strong><%= product.ecoScore.toUpperCase() %></strong>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Right Side: Data Groupings -->
+            <div class="detail-data">
+                
+                <!-- Nutrition Groupings -->
+                <div class="data-group card-box">
+                    <h3>Nutrition Facts</h3>
+                    <% if (product.nutriments && product.nutriments.servingSize) { %>
+                        <p class="serving-size">Serving Size: <%= product.nutriments.servingSize %></p>
+                    <% } %>
+                    <div class="nutrition-grid">
+                        <div class="nutrient">
+                            <span class="nt-label">Calories</span>
+                            <span class="nt-value"><%= product.nutriments.calories ? product.nutriments.calories + ' kcal' : '--' %></span>
+                        </div>
+                        <div class="nutrient">
+                            <span class="nt-label">Carbs</span>
+                            <span class="nt-value"><%= product.nutriments.carbs ? parseFloat(product.nutriments.carbs).toFixed(1) + 'g' : '--' %></span>
+                        </div>
+                        <div class="nutrient">
+                            <span class="nt-label">Sugar</span>
+                            <span class="nt-value"><%= product.nutriments.sugar ? parseFloat(product.nutriments.sugar).toFixed(1) + 'g' : '--' %></span>
+                        </div>
+                        <div class="nutrient">
+                            <span class="nt-label">Fat</span>
+                            <span class="nt-value"><%= product.nutriments.fat ? parseFloat(product.nutriments.fat).toFixed(1) + 'g' : '--' %></span>
+                        </div>
+                        <div class="nutrient">
+                            <span class="nt-label">Sat. Fat</span>
+                            <span class="nt-value"><%= product.nutriments.saturatedFat ? parseFloat(product.nutriments.saturatedFat).toFixed(1) + 'g' : '--' %></span>
+                        </div>
+                        <div class="nutrient">
+                            <span class="nt-label">Salt</span>
+                            <span class="nt-value"><%= product.nutriments.salt ? parseFloat(product.nutriments.salt).toFixed(2) + 'g' : '--' %></span>
+                        </div>
+                        <div class="nutrient">
+                            <span class="nt-label">Protein</span>
+                            <span class="nt-value"><%= product.nutriments.protein ? parseFloat(product.nutriments.protein).toFixed(1) + 'g' : '--' %></span>
+                        </div>
+                        <div class="nutrient">
+                            <span class="nt-label">Fiber</span>
+                            <span class="nt-value"><%= product.nutriments.fiber ? parseFloat(product.nutriments.fiber).toFixed(1) + 'g' : '--' %></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ingredients Grouping -->
+                <div class="data-group card-box">
+                    <h3>Ingredients & Allergens</h3>
+                    
+                    <% if (product.dietary && product.dietary.length > 0) { %>
+                        <div style="margin-bottom: 1rem; display: flex; flex-wrap: wrap; gap: 5px;">
+                            <% product.dietary.forEach(tag => { %>
+                                <span style="background: var(--color-primary-light, #e0f2fe); color: var(--color-primary, #0284c7); padding: 3px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 500; border: 1px solid currentColor;">
+                                    <%= tag.replace('en:', '').replace(/-/g, ' ').toUpperCase() %>
+                                </span>
+                            <% }) %>
+                        </div>
+                    <% } %>
+
+                    <% if (product.allergens) { %>
+                        <div class="allergen-alert">
+                            <strong>Allergens:</strong> <%= product.allergens %>
+                        </div>
+                    <% } %>
+                    
+                    <% if (product.traces) { %>
+                        <div class="allergen-alert" style="background-color: #fef08a; color: #854d0e; border-left-color: #eab308; margin-top: 0.5rem;">
+                            <strong>Traces:</strong> <%= product.traces %>
+                        </div>
+                    <% } %>
+
+                    <div class="ingredients-list">
+                        <% if (product.ingredients) { %>
+                            <p><%= product.ingredients %></p>
+                        <% } else { %>
+                            <p class="muted">No ingredient data available.</p>
+                        <% } %>
+                    </div>
+                    
+                    <% if (product.additives && product.additives.length > 0) { %>
+                        <div style="margin-top: 1rem; border-top: 1px solid var(--border-color, #eee); padding-top: 0.5rem;">
+                            <strong>Additives:</strong>
+                            <p style="font-size: 0.9em; color: var(--color-text-light, #666); margin-top: 0.25rem;">
+                                <%= product.additives.map(a => a.replace('en:', '').toUpperCase()).join(', ') %>
+                            </p>
+                        </div>
+                    <% } %>
+                </div>
+
+                <!-- Properties Grouping -->
+                <div class="data-group card-box props-group">
+                    <h3>Product Properties</h3>
+                    <ul class="props-list">
+                        <li>
+                            <strong>Quantity:</strong> 
+                            <span><%= product.quantity || 'Unknown' %></span>
+                        </li>
+                        <li>
+                            <strong>Packaging:</strong> 
+                            <span><%= product.packaging || 'Unknown' %></span>
+                        </li>
+                        <li>
+                            <strong>Categories:</strong> 
+                            <span><%= product.categories || 'Unknown' %></span>
+                        </li>
+                        <li>
+                            <strong>Labels:</strong> 
+                            <span><%= product.labels || 'None' %></span>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    <% } else { %>
+        <div class="no-results-card">
+            <h3>Product Not Found</h3>
+            <p>We couldn't retrieve the details for this product.</p>
+            <a href="/" class="search-btn accent-btn back-btn">Return Home</a>
+        </div>
+    <% } %>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const favBtn = document.getElementById('favorite-btn');
+    if(!favBtn) return;
+    
+    // We store minimal product info in favorites so the frontend can render immediately
+    const code = favBtn.getAttribute('data-code');
+    const name = favBtn.getAttribute('data-name');
+    const image = favBtn.getAttribute('data-image');
+    
+    let favs = JSON.parse(localStorage.getItem('saved_scans') || '{}');
+    
+    // Initial render
+    const updateIcon = () => {
+        if(favs[code]) {
+            favBtn.innerHTML = '⭐';
+            favBtn.style.color = '#f59e0b';
+            favBtn.style.transform = 'scale(1.15)';
+        } else {
+            favBtn.innerHTML = '☆';
+            favBtn.style.color = '#cbd5e1';
+            favBtn.style.transform = 'scale(1)';
+        }
+    };
+    updateIcon();
+
+    favBtn.addEventListener('click', () => {
+        if(favs[code]) {
+            delete favs[code];
+        } else {
+            favs[code] = { name, image, date: Date.now() };
+        }
+        localStorage.setItem('saved_scans', JSON.stringify(favs));
+        updateIcon();
+    });
+});
+</script>

@@ -1,12 +1,50 @@
 
 
-
-
-<nav class=" navlinks mainlinks flex-row">
+<nav class="navlinks mainlinks flex-row" style="align-items: center; width: 100%;">
     <%- include('../partials/header') %>
-    <ul class="nav-links flex-row">
-            <li><a href="/">Home</a></li>
-            <li><a href="/about">About</a></li>
-            <li><a href="/contact">Contact</a></li>
+    <ul class="nav-links flex-row" style="align-items: center; margin-left: auto; gap: 20px;">
+        <li><a href="/">Home</a></li>
+        <li><a href="/favorites">Saved Scans</a></li>
+        <li><a href="/about">About</a></li>
+        <li><a href="/contact">Contact</a></li>
+        <li>
+            <select id="region-selector" style="padding: 0.25rem 0.5rem; border-radius: 4px; border: 1px solid var(--color-border); background: var(--color-card); font-family: 'Inter', sans-serif; cursor: pointer; height: auto;">
+                <option value="">Auto (Browser)</option>
+                <option value="us">United States</option>
+                <option value="uk">United Kingdom</option>
+                <option value="kr">South Korea</option>
+                <option value="fr">France</option>
+                <option value="de">Germany</option>
+                <option value="es">Spain</option>
+                <option value="world">World (All)</option>
+            </select>
+        </li>
     </ul>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const selector = document.getElementById('region-selector');
+            
+            // Read cookie to set initial select value
+            const match = document.cookie.match(/(?:^| )off_region=([^;]+)/);
+            if (match && match[1]) {
+                selector.value = match[1];
+            } else {
+                selector.value = "";
+            }
+
+            selector.addEventListener('change', (e) => {
+                const val = e.target.value;
+                if (val) {
+                    // Set cookie to expire in 30 days
+                    document.cookie = `off_region=${val};path=/;max-age=${60 * 60 * 24 * 30}`;
+                } else {
+                    // Delete cookie for 'Auto'
+                    document.cookie = `off_region=;path=/;max-age=0`;
+                }
+                // Reload the top-level window so new searches pick up the cookie
+                window.location.reload();
+            });
+        });
+    </script>
 </nav>

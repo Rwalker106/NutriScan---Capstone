@@ -23,6 +23,12 @@
           Search
         </button>
       </form>
+
+      <div class="recent-searches-container" style="margin-top: 1rem; width: 100%;">
+        <p style="font-size: 0.85rem; color: var(--color-muted); margin-bottom: 0.5rem; font-weight: 500;">Recent Searches</p>
+        <div id="recent-searches-list" style="display: flex; gap: 0.5rem; flex-wrap: wrap;"></div>
+      </div>
+
     </div>
     <div class="barcode-search flex-column search-box-area">
       <h3>Or Enter (Scan) a barcode</h3>
@@ -35,14 +41,27 @@
           placeholder="Or enter a barcode..."
           required
         />
-        <button type="submit" class="search-btn">
-          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m-4-16v16M4 4v16m16-16v16m-4-16v16"></path></svg>
-          Search Barcode
-        </button>
+        <div style="display: flex; gap: 10px; width: 100%;">
+          <button type="submit" class="search-btn" style="flex: 1;">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m-4-16v16M4 4v16m16-16v16m-4-16v16"></path></svg>
+            Search
+          </button>
+          <button type="button" id="start-scan-btn" class="search-btn accent-btn" style="flex: 1;">
+            📸 Scan
+          </button>
+        </div>
+        <div id="qr-reader" style="width: 100%; border-radius: 8px; overflow: hidden; display: none; margin-top: 10px;"></div>
       </form>
     </div>
     <div class="multi-param-search flex-column search-box-area">
-      <h3>Filter Search</h3>
+      <h3 style="display: flex; align-items: center;">
+        Filter Search
+        <div class="info-tooltip">
+          <svg fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          <div class="tooltip-text"><strong>Pro Tip:</strong> Fill out multiple fields to <em>narrow</em> your search (AND logic).</div>
+        </div>
+      </h3>
+
       <form
         action="/search"
         method="get"
@@ -50,20 +69,31 @@
       >
         <label for="mp-name" class="sr-only">Product Name</label>
         <input type="text" id="mp-name" name="name" placeholder="Enter product name..." />
+        
+        <div class="connector-plus">+</div>
 
         <label for="mp-brand" class="sr-only">Brand</label>
         <input type="text" id="mp-brand" name="brands" placeholder="Enter brand(s)..." />
+        
+        <div class="connector-plus">+</div>
 
         <label for="mp-categories" class="sr-only">Categories</label>
         <input
           type="text"
           id="mp-categories"
           name="categories"
-          placeholder="e.g. ice-cream, sherbert"
+          placeholder="Categories e.g. ice-cream, sherbert"
+          style="margin-bottom: 0.5rem;"
         />
+        <span class="helper-text">Separate with commas to search <strong>either</strong> category (OR logic).</span>
+        
+        <div class="connector-plus">+</div>
 
         <label for="mp-labels" class="sr-only">Labels</label>
-        <input type="text" id="mp-labels" name="labels" placeholder="e.g organic, vegan..." />
+        <input type="text" id="mp-labels" name="labels" placeholder="Labels e.g organic, vegan..." style="margin-bottom: 0.5rem;" />
+        <span class="helper-text">Separate with commas to search <strong>either</strong> label.</span>
+        
+        <div class="connector-plus">+</div>
 
         <label for="mp-nutriscore" class="sr-only">Nutri-Score Grade</label>
         <select id="mp-nutriscore" name="nutriscore_grade">
@@ -84,11 +114,104 @@
           <option value="4">4 - Ultra-processed foods</option>
         </select>
 
-        <button type="submit" class="search-btn" style="margin-top: 0.5rem;">
-          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
-          Filter Search
-        </button>
+        <div class="form-actions" style="display: flex; gap: 10px; margin-top: 0.5rem;">
+          <button type="submit" class="search-btn">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+            Filter Search
+          </button>
+          <button type="reset" class="search-btn" style="background-color: transparent; border: 1px solid var(--color-border); color: var(--color-muted);">
+            Clear
+          </button>
+        </div>
       </form>
     </div>
   </div>
 </div>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    /* --- RECENT SEARCHES LOGIC --- */
+    const mainForm = document.querySelector('.search-form');
+    const mainInput = document.getElementById('product-query');
+    const recentList = document.getElementById('recent-searches-list');
+
+    function renderRecent() {
+        const searches = JSON.parse(localStorage.getItem('recent_searches') || '[]');
+        recentList.innerHTML = '';
+        if(searches.length === 0) {
+            recentList.innerHTML = '<span style="font-size:0.8rem;color:#ccc;font-style:italic;">None yet...</span>';
+        }
+        searches.forEach(term => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.textContent = term;
+            btn.style = 'background: #f1f5f9; border: 1px solid #e2e8f0; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; cursor: pointer; color: var(--color-text); font-family: Inter, sans-serif;';
+            btn.onclick = () => {
+                mainInput.value = term;
+                mainForm.submit();
+            };
+            recentList.appendChild(btn);
+        });
+    }
+
+    renderRecent();
+
+    mainForm.addEventListener('submit', (e) => {
+        const val = mainInput.value.trim();
+        if (val) {
+            let searches = JSON.parse(localStorage.getItem('recent_searches') || '[]');
+            searches = searches.filter(t => t !== val);
+            searches.unshift(val);
+            if (searches.length > 5) searches.pop(); // Keep 5
+            localStorage.setItem('recent_searches', JSON.stringify(searches));
+        }
+    });
+
+
+    /* --- BARCODE LOGIC & SCANNER --- */
+    const barcodeForm = document.querySelector('.barcode-form');
+    const barcodeInput = document.getElementById('barcode-input');
+    const scanBtn = document.getElementById('start-scan-btn');
+    const qrReaderNode = document.getElementById('qr-reader');
+    let scanner = null;
+
+    // Prevent default query string append and use clean URL /product/:barcode
+    barcodeForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const code = barcodeInput.value.trim();
+        if(code) {
+           window.location.href = `/product/${code}`;
+        }
+    });
+
+    scanBtn.addEventListener('click', () => {
+        if (qrReaderNode.style.display === 'block') {
+            // Stop scanning
+            if (scanner) scanner.clear();
+            qrReaderNode.style.display = 'none';
+            scanBtn.innerHTML = '📸 Scan';
+        } else {
+            // Start scanning
+            qrReaderNode.style.display = 'block';
+            scanBtn.innerHTML = '⏹ Stop';
+            
+            scanner = new Html5QrcodeScanner(
+              "qr-reader", 
+              { fps: 10, qrbox: {width: 250, height: 150} }, 
+              false
+            );
+            scanner.render((decodedText) => {
+                // Handle success
+                barcodeInput.value = decodedText;
+                scanner.clear();
+                qrReaderNode.style.display = 'none';
+                scanBtn.innerHTML = '📸 Scan';
+                // Route automatically
+                window.location.href = `/product/${decodedText}`;
+            }, undefined);
+        }
+    });
+});
+</script>

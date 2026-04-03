@@ -1,0 +1,91 @@
+<div class="products-container">
+    <div class="products-header" style="margin-bottom: 1.5rem;">
+        <a href="/" style="display: inline-flex; align-items: center; gap: 5px; color: var(--color-primary); text-decoration: none; font-weight: 600; font-family: 'Inter', sans-serif;">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Back to Search
+        </a>
+    </div>
+    <h2 style="margin-top: 0;">Search Results</h2>
+    
+    <% if (products && products.length > 0) { %>
+        <div class="products-grid">
+            <% products.forEach(function(product) { %>
+                <a href="/product/<%= product.code %>" class="product-card" style="text-decoration: none; color: inherit; display: flex; flex-direction: column;">
+                    <div class="product-image-container">
+                        <img src="<%= product.image %>" alt="<%= product.name %>" class="product-img" onerror="this.src='/img/no-image.png'">
+                    </div>
+                    <div class="product-content">
+                        <h3 class="product-title"><%= product.name %></h3>
+                        
+                        <% if (product.brand && product.brand !== 'Unknown') { %>
+                            <p class="product-brand"><%= product.brand %></p>
+                        <% } %>
+                        
+                        <div class="product-badges">
+                            <% if (product.nutriScore) { %>
+                                <span class="badge nutri-score score-<%= product.nutriScore.toLowerCase() %>">
+                                    Nutri-Score <%= product.nutriScore.toUpperCase() %>
+                                </span>
+                            <% } %>
+                            <% if (product.nova) { %>
+                                <span class="badge nova-group">
+                                    NOVA <%= product.nova %>
+                                </span>
+                            <% } %>
+                            <% if (product.ecoScore && product.ecoScore !== 'unknown' && product.ecoScore !== 'not-applicable') { %>
+                                <span class="badge eco-score score-<%= product.ecoScore.toLowerCase() %>">
+                                    Eco-Score <%= product.ecoScore.toUpperCase() %>
+                                </span>
+                            <% } %>
+                        </div>
+                        
+                        <div class="product-details">
+                            <% if (product.quantity) { %>
+                                <p><strong>Quantity:</strong> <%= product.quantity %></p>
+                            <% } %>
+                            <% if (product.allergens) { %>
+                                <p class="allergens"><strong>Allergens:</strong> <%= product.allergens %></p>
+                            <% } %>
+                            <% if (product.categories) { %>
+                                <p class="categories"><strong>Categories:</strong> <%= product.categories %></p>
+                            <% } %>
+                        </div>
+                        
+                        <div class="product-footer">
+                            <span class="product-code"><%= product.code %></span>
+                        </div>
+                    </div>
+                </a>
+            <% }); %>
+        </div>
+
+        <!-- Pagination Controls -->
+        <% if (typeof page !== 'undefined' && typeof basePath !== 'undefined') { %>
+            <div class="pagination-controls" style="display: flex; justify-content: center; gap: 1rem; margin-top: 3rem;">
+                <% if (page > 1) { %>
+                    <a href="<%= basePath %>&page=<%= page - 1 %>" class="search-btn" style="width: auto; padding: 10px 20px;">
+                        &laquo; Previous Page
+                    </a>
+                <% } %>
+                
+                <% if (products.length === 30) { %>
+                    <a href="<%= basePath %>&page=<%= page + 1 %>" class="search-btn accent-btn" style="width: auto; padding: 10px 20px;">
+                        Next Page &raquo;
+                    </a>
+                <% } %>
+            </div>
+        <% } %>
+
+    <% } else { %>
+        <div class="no-results-card">
+            <h3>No Products Found</h3>
+            <p>We couldn't find any products matching your search criteria.</p>
+            <a href="/" class="search-btn accent-btn back-btn">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Back to Search
+            </a>
+        </div>
+    <% } %>
+</div>

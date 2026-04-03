@@ -34,8 +34,22 @@ app.use(express.json());
 app.use(expressEjsLayouts);
 app.set('layout', 'layouts/main'); // Set the default layout file (views/layouts/main.ejs)  
 
+// Simple in-memory cache
+const apiCache = new Map();
+const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+
 // Function to set a custom User-Agent for all outgoing requests
 async function offFetch(URL) {
+    if (apiCache.has(URL)) {
+        const cached = apiCache.get(URL);
+        if (Date.now() - cached.timestamp < CACHE_TTL) {
+            console.log("Cache Hit!");
+            return cached.data;
+        } else {
+            apiCache.delete(URL);
+        }
+    }
+
     try {        
         const response = await axios.get(URL, {
                 headers: {
@@ -43,11 +57,39 @@ async function offFetch(URL) {
         },
     });
 
+        apiCache.set(URL, {
+            data: response.data,
+            timestamp: Date.now()
+        });
+
         return response.data;
     } catch (err) {
-    console.error("Open Food Facts error:", err.message);
-    throw err;
+        console.error("Open Food Facts error:", err.message);
+        throw err;
     }
+}
+
+// Function to extract region from cookie or Accept-Language header
+function getRegion(req) {
+    // 1. Check for manual override cookie
+    const cookies = req.headers.cookie;
+    if (cookies) {
+        const match = cookies.match(/(?:^| )off_region=([^;]+)/);
+        if (match && match[1]) return match[1];
+    }
+    
+    // 2. Fallback to Accept-Language header (e.g. "en-US,en;q=0.9")
+    const acceptLang = req.headers['accept-language'];
+    if (acceptLang) {
+        let match;
+        // Search for region code (2 letters following a dash, ignoring quality score)
+        const regex = /[a-zA-Z]{2}-([a-zA-Z]{2})/g;
+        if ((match = regex.exec(acceptLang)) !== null) {
+            return match[1].toLowerCase(); // E.g., 'us' from 'en-US'
+        }
+    }
+    
+    return 'world'; // Default global database
 }
 
 // Function to normalize product data from OpenFoodFacts API
@@ -65,7 +107,9 @@ function normalizeProduct(p) {
     // Nutrition
     nutriments: {
         calories: p.nutriments?.energy_kcal_100g || null,
+        carbs: p.nutriments?.carbohydrates_100g || null,
         fat: p.nutriments?.fat_100g || null,
+        saturatedFat: p.nutriments?.['saturated-fat_100g'] || null,
         sugar: p.nutriments?.sugars_100g || null,
         salt: p.nutriments?.salt_100g || null,
         protein: p.nutriments?.proteins_100g || null,
@@ -83,10 +127,14 @@ function normalizeProduct(p) {
     // Scores
     nutriScore: p.nutriscore_grade || null,
     nova: p.nova_group || null,
+    ecoScore: p.ecoscore_grade || null,
 
     // Ingredients
     ingredients: p.ingredients_text || null,
     allergens: p.allergens || null,
+    traces: p.traces || null,
+    additives: p.additives_tags || null,
+    dietary: p.ingredients_analysis_tags || null,
 
     // Packaging
     packaging: p.packaging || null,
@@ -103,12 +151,13 @@ app.get('/', async (req, res) => {
 // Route for barcode search
 app.get('/product/:barcode', async (req, res) => {
     const {barcode} = req.params;
+    const region = getRegion(req);
 
-    const barcodeURL = `https://world.openfoodfacts.org/api/v0/product/${barcode}.json`;
+    const barcodeURL = `https://${region}.openfoodfacts.org/api/v0/product/${barcode}.json`;
     try {
         const response = await offFetch(barcodeURL);
         const product = normalizeProduct(response.product);
-        res.render('product', { products:[product] }); // pass single product as an array to the template
+        res.render('product_detail', { product });
     } catch (error) {
         console.error(error);
         res.status(500).send('Error fetching data');
@@ -116,12 +165,21 @@ app.get('/product/:barcode', async (req, res) => {
 });
 // Route for search by name
 app.get('/search', async (req, res) => {
-    const { name, nutriscore_grade, nova_group, brand, categories, labels } = req.query;
+    // Both 'query' (main search) and 'name' (filter search) maps to search_terms
+    // The filter search form uses 'brands', not 'brand'
+    const { query, name, nutriscore_grade, nova_group, brands, categories, labels } = req.query;
+    
+    let page = parseInt(req.query.page) || 1;
+    if (page < 1) page = 1;
+
     const params = new URLSearchParams();
-    if (name) params.append('name', name);
+    
+    const searchTerms = query || name;
+    if (searchTerms) params.append('search_terms', searchTerms);
+    
     if (nutriscore_grade) params.append('nutriscore_grade', nutriscore_grade);
     if (nova_group) params.append('nova_group', nova_group);
-    if (brand) params.append('brands', brand);
+    if (brands) params.append('brands', brands);
     // If single value: req.query.categories = 'snacks'
     // If multiple values: req.query.categories = ['snacks', 'dairy']
     if (categories) {
@@ -133,21 +191,39 @@ app.get('/search', async (req, res) => {
         params.append('labels_tags', labelsArray.join(','));
     }
 
+    params.append('action', 'process');
     params.append('json', '1');
-    params.append('fields', 'product_name,brands,nutriscore_grade,nutriments,image_front_url,ingredients_text,allergens,packaging,quantity,labels,categories,serving_size,code,nova_group');
+    params.append('page_size', '15'); // Limit results to prevent 503 timeouts from OFF
+    params.append('page', page.toString());
+    params.append('fields', 'product_name,brands,nutriscore_grade,nutriments,image_front_url,ingredients_text,allergens,packaging,quantity,labels,categories,serving_size,code,nova_group,ecoscore_grade');
 
-    const searchURL = `https://world.openfoodfacts.org/cgi/search.pl?${params.toString()}`;
+    const region = getRegion(req);
+    const searchURL = `https://${region}.openfoodfacts.org/cgi/search.pl?${params.toString()}`;
     
     try {
         const response = await offFetch(searchURL);
+        
+        const qsParams = new URLSearchParams(req.query);
+        qsParams.delete('page');
+        const basePath = '/search?' + qsParams.toString();
+
+        if (!response.products) {
+            console.error('No products array in response from API.');
+            return res.render('product', { products: [], page, basePath });
+        }
+        
         const products = response.products.map(normalizeProduct);
-        res.render('product', { products });
+        res.render('product', { products, page, basePath });
     } catch (error) {
         console.error(error);
         res.status(500).send('Error fetching data');
     }
 });
 
+// Route for favorites page
+app.get('/favorites', (req, res) => {
+    res.render('favorites');
+});
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
